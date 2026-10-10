@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Privacy Policy for TaskFlow - 100% Client-Side, Zero Tracking, Private Local Storage.">
+  <title>Privacy Policy - TaskFlow</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="styles.css">
+  <script>
+    (function() {
+      try {
+        const savedTheme = localStorage.getItem('taskflow_theme');
+        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        } else {
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <style>
+    .legal-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 5rem 1.5rem;
+    }
+    .legal-header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 1.5rem;
+    }
+    .legal-back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.88rem;
+      color: var(--accent-primary);
+      margin-bottom: 1.25rem;
+      font-weight: 500;
+    }
+    .legal-back-link:hover {
+      text-decoration: underline;
+    }
+    .legal-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+    }
+    .legal-meta {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 0.4rem;
+    }
+    .legal-section {
+      margin-bottom: 2rem;
+    }
+    .legal-section h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.75rem;
+    }
+    .legal-section p {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 0.85rem;
+    }
+    .legal-section ul {
+      list-style-type: disc;
+      padding-left: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .legal-section li {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 0.4rem;
+    }
+    .legal-footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border-subtle);
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+  </style>
+</head>
+<body style="overflow-y: auto;">
+  <main class="legal-container">
+    <div class="legal-header">
+      <a href="index.html" class="legal-back-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Back to TaskFlow Dashboard
+      </a>
+      <h1 class="legal-title">Privacy Policy</h1>
+      <p class="legal-meta">Effective Date: October 10, 2026 | Version 1.0</p>
+    </div>
+
+    <section class="legal-section">
+      <h2>1. Overview and Core Privacy Principle</h2>
+      <p>TaskFlow is designed from the ground up as an offline-first, client-side productivity application. We believe that your personal tasks, schedules, and work habits are strictly confidential and belong solely to you.</p>
+      <p>Because TaskFlow runs entirely within your web browser, <strong>no personal data, task contents, or usage analytics are ever collected, transmitted, stored, or processed on any remote server.</strong></p>
+    </section>
+
+    <section class="legal-section">
+      <h2>2. Data Storage and Local Isolation</h2>
+      <p>All data created within TaskFlow is stored exclusively in your browser's sandboxed <code>localStorage</code> API. This includes:</p>
+      <ul>
+        <li>Task titles, descriptions, due dates, priority labels, and tags</li>
+        <li>Custom and default category configurations</li>
+        <li>Focus timer session counts and historical completion timestamps</li>
+        <li>Interface preferences, including light/dark theme selection and sound toggles</li>
+      </ul>
+      <p>This data remains strictly on your local device. It is not synchronized across devices automatically and cannot be accessed by external websites or unauthorized parties.</p>
+    </section>
+
+    <section class="legal-section">
+      <h2>3. Third-Party Services and Analytics</h2>
+      <p>TaskFlow does not integrate with any third-party advertising networks, analytics trackers, cloud databases, or external telemetry providers. We do not use tracking pixels, external fonts, or remote trackers.</p>
+    </section>
+
+    <section class="legal-section">
+      <h2>4. Data Portability and User Control</h2>
+      <p>You have complete control over your data at all times:</p>
+      <ul>
+        <li><strong>Exporting:</strong> You can export a full JSON backup of all stored tasks and preferences at any time via the Settings panel.</li>
+        <li><strong>Importing:</strong> You can restore backups using the Import tool, which validates JSON schemas locally before saving.</li>
+        <li><strong>Deletion:</strong> You can permanently wipe all stored data using the "Reset Application" button in Settings, or by clearing your browser's site data and cookies.</li>
+      </ul>
+    </section>
+
+    <section class="legal-section">
+      <h2>5. Changes to This Privacy Policy</h2>
+      <p>Any updates to this policy will be documented in the open-source repository and reflected on this page. Because we collect no contact information, we encourage users to review this page periodically.</p>
+    </section>
+
+    <footer class="legal-footer">
+      <div>TaskFlow: Private, Local Productivity</div>
+      <div><a href="terms.html" style="color: var(--accent-primary);">Terms and Conditions</a></div>
+    </footer>
+  </main>
+</body>
+</html>

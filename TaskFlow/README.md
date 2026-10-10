@@ -1,4 +1,4 @@
-# TaskFlow — Smart To-Do List & Productivity Dashboard
+# TaskFlow: Smart To-Do List & Productivity Dashboard
 
 TaskFlow is a fast, minimalist, and private productivity dashboard built with modern vanilla web technologies. It is designed to run entirely locally in your web browser with zero backend dependencies, zero telemetry, and zero subscription requirements.
 
@@ -150,6 +150,50 @@ TaskFlow saves your data directly inside your browser's private `localStorage` s
 1. **No Cloud Synchronization**: Because TaskFlow is completely serverless and private, tasks do not sync in real-time between your phone and computer. Use the **Export JSON** feature to migrate your tasks across devices.
 2. **In-App Reminders Require Open Tab**: In-app notifications and sound alerts trigger while the TaskFlow browser tab is open. Because there is no background server worker or external notification service, reminders will not trigger if your browser is closed.
 3. **Browser Cache Clearing**: Clearing your browser history and site data will remove `localStorage`. It is recommended to periodically export a JSON backup of important tasks.
+
+---
+
+## 🌐 Custom Domain & Production Hosting
+
+To publish TaskFlow on a custom domain (e.g., `tasks.yourdomain.com` or `yourdomain.com`) using GitHub Pages:
+
+### Step 1: Add your CNAME File
+Create a single-line file named `CNAME` in the repository root containing your domain:
+```text
+tasks.yourdomain.com
+```
+
+### Step 2: Configure DNS Records
+In your DNS provider (Cloudflare, Namecheap, GoDaddy, Route53, etc.):
+- **For Subdomains** (`tasks.yourdomain.com`):
+  - Type: `CNAME`
+  - Host/Name: `tasks`
+  - Target/Value: `<username>.github.io`
+- **For Apex Domains** (`yourdomain.com`):
+  - Type: `A`
+  - Target/Value:
+    - `185.199.108.153`
+    - `185.199.109.153`
+    - `185.199.110.153`
+    - `185.199.111.153`
+
+### Step 3: Enable in GitHub Repository Settings
+1. Go to your repository on GitHub: `https://github.com/Manojhr06/Todo`
+2. Navigate to **Settings** -> **Pages**.
+3. Under **Branch**, select `main` and `/ (root)`, then click **Save**.
+4. In **Custom domain**, enter your domain name and click **Save**.
+5. Check **Enforce HTTPS** to ensure free automated SSL encryption.
+
+---
+
+## 🛡️ Production Design & Legal Compliance Standards
+
+TaskFlow strictly adheres to clean, production-grade utility principles:
+- **No Vibe Slop**: Zero purple gradients, zero pill-shaped buttons, zero fake customer counters, zero fake social proof, and zero scroll choreography.
+- **No AI Tags or AI Slop**: Free of "Made with AI" labels, synthetic stock photos, or generated filler copy.
+- **Strict Typographic Standards**: Crisp system typography, zero emoji interface icons (replaced with precise inline SVGs), and zero decorative em dashes.
+- **SVG Favicon**: Embedded vector favicon (`favicon.svg`) rendering crisp marks on all display densities.
+- **Legal Infrastructure**: Dedicated [Privacy Policy](privacy.html) and [Terms and Conditions](terms.html) pages accessible from all application surfaces.
 
 ---
 

@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="TaskFlow - Smart To-Do List & Productivity Dashboard. Fast, local, private, and distraction-free task management.">
-  <title>TaskFlow — Smart Productivity & Tasks</title>
+  <title>TaskFlow: Smart Productivity & Tasks</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="styles.css">
   <script>
     // Prevent theme flash before CSS renders
@@ -230,6 +231,12 @@
           <span class="footer-btn-text">Shortcuts</span>
           <kbd class="shortcut-tag">?</kbd>
         </button>
+      </div>
+
+      <div class="sidebar-legal-bar">
+        <a href="privacy.html" class="sidebar-legal-link">Privacy</a>
+        <span class="sidebar-legal-sep" aria-hidden="true">•</span>
+        <a href="terms.html" class="sidebar-legal-link">Terms</a>
       </div>
     </aside>
 
@@ -793,6 +800,44 @@
                   <p><strong>100% Client-Side & Private:</strong> TaskFlow runs completely on your machine. No accounts, no backend databases, no analytics trackers, and no external AI services are used.</p>
                   <p><strong>Browser-Specific:</strong> Data is saved in this browser's <code>localStorage</code> sandbox. It does not automatically sync across separate browsers, incognito windows, or other devices. To transfer your tasks to another device, use the <strong>Export JSON</strong> feature above.</p>
                 </div>
+              </div>
+            </div>
+
+            <!-- Legal & Compliance Documentation -->
+            <div class="card-panel">
+              <div class="card-panel-header">
+                <div>
+                  <h3 class="card-panel-title">Legal & Compliance</h3>
+                  <p class="card-panel-subtitle">Transparent legal documentation and terms</p>
+                </div>
+              </div>
+              <div class="settings-item-row">
+                <div class="settings-item-info">
+                  <h4 class="settings-item-title">Privacy Policy</h4>
+                  <p class="settings-item-desc">Read our commitment to zero-tracking and local storage isolation.</p>
+                </div>
+                <a href="privacy.html" class="btn btn-secondary btn-sm" target="_blank" rel="noopener">
+                  <span>View Privacy Policy</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;">
+                    <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"></path>
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                  </svg>
+                </a>
+              </div>
+              <div class="settings-item-row">
+                <div class="settings-item-info">
+                  <h4 class="settings-item-title">Terms and Conditions</h4>
+                  <p class="settings-item-desc">Review usage terms, disclaimer of warranties, and local data guidelines.</p>
+                </div>
+                <a href="terms.html" class="btn btn-secondary btn-sm" target="_blank" rel="noopener">
+                  <span>View Terms</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;">
+                    <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"></path>
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                  </svg>
+                </a>
               </div>
             </div>
 

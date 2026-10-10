@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Terms and Conditions for TaskFlow - Open-source, client-side productivity tool.">
+  <title>Terms and Conditions - TaskFlow</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="styles.css">
+  <script>
+    (function() {
+      try {
+        const savedTheme = localStorage.getItem('taskflow_theme');
+        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        } else {
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <style>
+    .legal-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 5rem 1.5rem;
+    }
+    .legal-header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 1.5rem;
+    }
+    .legal-back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.88rem;
+      color: var(--accent-primary);
+      margin-bottom: 1.25rem;
+      font-weight: 500;
+    }
+    .legal-back-link:hover {
+      text-decoration: underline;
+    }
+    .legal-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+    }
+    .legal-meta {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 0.4rem;
+    }
+    .legal-section {
+      margin-bottom: 2rem;
+    }
+    .legal-section h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.75rem;
+    }
+    .legal-section p {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 0.85rem;
+    }
+    .legal-section ul {
+      list-style-type: disc;
+      padding-left: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .legal-section li {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 0.4rem;
+    }
+    .legal-footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border-subtle);
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+  </style>
+</head>
+<body style="overflow-y: auto;">
+  <main class="legal-container">
+    <div class="legal-header">
+      <a href="index.html" class="legal-back-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Back to TaskFlow Dashboard
+      </a>
+      <h1 class="legal-title">Terms and Conditions</h1>
+      <p class="legal-meta">Effective Date: October 10, 2026 | Version 1.0</p>
+    </div>
+
+    <section class="legal-section">
+      <h2>1. Acceptance of Terms</h2>
+      <p>By accessing or using TaskFlow, you agree to be bound by these Terms and Conditions. If you do not agree with any part of these terms, please discontinue using the application.</p>
+    </section>
+
+    <section class="legal-section">
+      <h2>2. Permitted Use and License</h2>
+      <p>TaskFlow is provided as a client-side productivity tool for personal and commercial task management. You are granted a non-exclusive, worldwide, royalty-free license to run, inspect, and modify the software in accordance with open-source software practices.</p>
+    </section>
+
+    <section class="legal-section">
+      <h2>3. User Responsibility for Local Data</h2>
+      <p>Because TaskFlow stores data strictly in your web browser's local memory without cloud backups:</p>
+      <ul>
+        <li>You are solely responsible for backing up your tasks using the built-in JSON Export feature.</li>
+        <li>We cannot recover data that has been deleted due to browser cache clearance, private browsing mode termination, hardware failure, or device loss.</li>
+        <li>You agree not to use the application to store highly confidential secrets or unencrypted credentials.</li>
+      </ul>
+    </section>
+
+    <section class="legal-section">
+      <h2>4. Disclaimer of Warranty</h2>
+      <p>TaskFlow is provided on an "AS IS" and "AS AVAILABLE" basis without warranties of any kind, whether express or implied, including but not limited to implied warranties of merchantability, fitness for a particular purpose, or non-infringement.</p>
+      <p>While the application incorporates robust safeguards against data loss, we do not warrant that operation will be completely uninterrupted or error-free.</p>
+    </section>
+
+    <section class="legal-section">
+      <h2>5. Limitation of Liability</h2>
+      <p>Under no circumstances shall the creators or contributors of TaskFlow be liable for any direct, indirect, incidental, special, or consequential damages resulting from the use or inability to use the application, including loss of data or business interruption.</p>
+    </section>
+
+    <footer class="legal-footer">
+      <div>TaskFlow: Private, Local Productivity</div>
+      <div><a href="privacy.html" style="color: var(--accent-primary);">Privacy Policy</a></div>
+    </footer>
+  </main>
+</body>
+</html>

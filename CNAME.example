@@ -1,0 +1,5 @@
+# To connect your custom domain to GitHub Pages:
+# 1. Rename this file to 'CNAME' (without .example)
+# 2. Replace the line below with your domain (e.g. todo.yourdomain.com)
+# 3. Commit and push to main
+todo.yourdomain.com

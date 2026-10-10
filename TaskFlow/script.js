@@ -1,6 +1,6 @@
 /**
  * ============================================================================
- * TASKFLOW — SMART TO-DO LIST & PRODUCTIVITY DASHBOARD
+ * TASKFLOW: SMART TO-DO LIST & PRODUCTIVITY DASHBOARD
  * Modern, private, offline-first task management in Vanilla JavaScript.
  * ============================================================================
  */
@@ -923,7 +923,7 @@
       }
       this.updateToggleBtn(false);
       document.getElementById('sidebarTimerDot').classList.remove('active');
-      document.title = 'TaskFlow — Smart Productivity & Tasks';
+      document.title = 'TaskFlow: Smart Productivity & Tasks';
     },
 
     toggle() {
@@ -995,7 +995,7 @@
 
       // Update page title when running
       if (AppState.timer.isRunning) {
-        document.title = `(${formatted}) ${POMODORO_MODES[AppState.timer.mode].name} — TaskFlow`;
+        document.title = `(${formatted}) ${POMODORO_MODES[AppState.timer.mode].name}: TaskFlow`;
       }
 
       // Circular Ring Progress
