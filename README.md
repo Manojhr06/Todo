@@ -198,15 +198,34 @@ TaskFlow saves your data directly inside your browser's private `localStorage` s
 
 ## 🌐 Custom Domain & Production Hosting
 
+### Option A: Deploy on Netlify (Recommended)
+
+1. Log in to [Netlify](https://app.netlify.com/).
+2. Click **Add new site** -> **Import an existing project**.
+3. Select **GitHub** and authorize access to your repository: `https://github.com/Manojhr06/Todo`.
+4. Configure site settings:
+   - **Branch to deploy**: `main`
+   - **Base directory**: (leave blank / root)
+   - **Build command**: (leave blank)
+   - **Publish directory**: `.` (or leave as root)
+5. Click **Deploy Todo**.
+6. **Custom Domain on Netlify**:
+   - In your Netlify site overview, go to **Site configuration** -> **Domain management**.
+   - Click **Add a domain** and type your custom domain (e.g. `todo.yourdomain.com`).
+   - Follow Netlify's DNS guidance (add a CNAME pointing to `<your-site-name>.netlify.app` or configure Netlify DNS).
+   - Netlify will automatically provision a free Let's Encrypt SSL certificate.
+
+### Option B: Deploy on GitHub Pages
+
 To publish TaskFlow on a custom domain (e.g., `tasks.yourdomain.com` or `yourdomain.com`) using GitHub Pages:
 
-### Step 1: Add your CNAME File
+#### Step 1: Add your CNAME File
 Create a single-line file named `CNAME` in the repository root containing your domain:
 ```text
 tasks.yourdomain.com
 ```
 
-### Step 2: Configure DNS Records
+#### Step 2: Configure DNS Records
 In your DNS provider (Cloudflare, Namecheap, GoDaddy, Route53, etc.):
 - **For Subdomains** (`tasks.yourdomain.com`):
   - Type: `CNAME`
@@ -220,7 +239,7 @@ In your DNS provider (Cloudflare, Namecheap, GoDaddy, Route53, etc.):
     - `185.199.110.153`
     - `185.199.111.153`
 
-### Step 3: Enable in GitHub Repository Settings
+#### Step 3: Enable in GitHub Repository Settings
 1. Go to your repository on GitHub: `https://github.com/Manojhr06/Todo`
 2. Navigate to **Settings** -> **Pages**.
 3. Under **Branch**, select `main` and `/ (root)`, then click **Save**.
