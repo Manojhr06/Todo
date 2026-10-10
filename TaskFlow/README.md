@@ -90,25 +90,61 @@ TaskFlow/
 
 ---
 
-## 🚀 How to Run the Website Locally
+## 🚀 Quick Start: How to Run This
 
-You can run TaskFlow locally without any installation:
+TaskFlow requires **no build tools, no Node.js installations, and no server configuration**. You can run it immediately using any of the methods below:
 
-### Option 1: Direct Browser Launch (Simplest)
-1. Navigate to the project directory on your computer:
+### Method 1: Run Live on the Web (GitHub Pages)
+You can deploy TaskFlow on GitHub Pages for free with two clicks:
+1. On GitHub, navigate to **Settings** -> **Pages**.
+2. Under **Build and deployment** -> **Branch**, select `main` and root `/ (root)`.
+3. Click **Save**.
+4. GitHub will provide a live URL in seconds:
    ```text
-   C:\Users\Manoj H R\Desktop\Todo List\
+   https://manojhr06.github.io/Todo/
    ```
-2. Double-click `index.html` (or right-click `index.html` → **Open with** → your preferred web browser: Chrome, Edge, Firefox, or Safari).
-3. The application will immediately load and work 100% offline.
 
-### Option 2: Using VS Code Live Server
-1. Open the project folder in Visual Studio Code:
+---
+
+### Method 2: Clone from GitHub & Open Directly (Local)
+1. Clone the repository to your machine:
    ```bash
-   code "C:\Users\Manoj H R\Desktop\Todo List"
+   git clone https://github.com/Manojhr06/Todo.git
+   cd Todo
    ```
-2. If you have the **Live Server** extension installed, right-click `index.html` and select **Open with Live Server** (or click "Go Live" in the bottom status bar).
-3. The app will launch in your browser at `http://127.0.0.1:5500/index.html`.
+2. Double-click `index.html` to open it in Chrome, Edge, Firefox, or Safari.
+3. The app opens immediately and runs 100% offline.
+
+---
+
+### Method 3: Run via Local Terminal Server
+If you prefer running on `localhost`:
+
+**Using Python (built into most systems):**
+```bash
+python -m http.server 8000
+```
+Then visit `http://localhost:8000` in your browser.
+
+**Using Node / npx:**
+```bash
+npx serve .
+```
+
+**Using PowerShell (Windows):**
+```powershell
+Start-Process "index.html"
+```
+
+---
+
+### Method 4: Run with VS Code Live Server
+1. Open the project in VS Code:
+   ```bash
+   code .
+   ```
+2. Right-click `index.html` and click **"Open with Live Server"** (or click **"Go Live"** in the bottom status bar).
+3. The application will launch at `http://127.0.0.1:5500/index.html`.
 
 ---
 
