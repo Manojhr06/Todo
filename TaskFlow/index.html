@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="TaskFlow - Smart To-Do List & Productivity Dashboard. Fast, local, private, and distraction-free task management.">
+  <title>TaskFlow — Smart Productivity & Tasks</title>
+  <link rel="stylesheet" href="styles.css">
+  <script>
+    // Prevent theme flash before CSS renders
+    (function() {
+      try {
+        const savedTheme = localStorage.getItem('taskflow_theme');
+        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        } else {
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      } catch (e) {
+        // Fallback to light theme if localStorage is restricted
+      }
+    })();
+  </script>
+</head>
+<body>
+  <!-- App Layout Container -->
+  <div class="app-layout" id="appLayout">
+    
+    <!-- Mobile Sidebar Backdrop Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar" aria-label="Main Navigation">
+      <div class="sidebar-header">
+        <a href="#dashboard" class="brand-link" id="brandLink">
+          <div class="brand-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path>
+              <circle cx="12" cy="12" r="4"></circle>
+            </svg>
+          </div>
+          <div class="brand-info">
+            <span class="brand-name">TaskFlow</span>
+            <span class="brand-badge">Local</span>
+          </div>
+        </a>
+        <button class="icon-button mobile-close-btn" id="closeSidebarBtn" aria-label="Close navigation menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Quick Action: New Task -->
+      <div class="sidebar-action">
+        <button class="btn btn-primary btn-block" id="sidebarNewTaskBtn" aria-label="Create new task (shortcut: N)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          <span>New Task</span>
+          <kbd class="shortcut-tag" title="Press N">N</kbd>
+        </button>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">Views</div>
+        <ul class="nav-list" role="list">
+          <li>
+            <button class="nav-item active" data-view="dashboard" id="nav-dashboard">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="3" width="7" height="7"></rect>
+                <rect x="14" y="3" width="7" height="7"></rect>
+                <rect x="14" y="14" width="7" height="7"></rect>
+                <rect x="3" y="14" width="7" height="7"></rect>
+              </svg>
+              <span class="nav-label">Dashboard</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-item" data-view="all" id="nav-all">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M9 11l3 3L22 4"></path>
+                <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"></path>
+              </svg>
+              <span class="nav-label">All Tasks</span>
+              <span class="nav-badge" id="badge-all">0</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-item" data-view="today" id="nav-today">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+              <span class="nav-label">My Day</span>
+              <span class="nav-badge" id="badge-today">0</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-item" data-view="upcoming" id="nav-upcoming">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+              <span class="nav-label">Upcoming</span>
+              <span class="nav-badge" id="badge-upcoming">0</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-item" data-view="overdue" id="nav-overdue">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              <span class="nav-label">Overdue</span>
+              <span class="nav-badge danger-badge" id="badge-overdue">0</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-item" data-view="completed" id="nav-completed">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+              <span class="nav-label">Completed</span>
+              <span class="nav-badge" id="badge-completed">0</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-item" data-view="high-priority" id="nav-high-priority">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+              <span class="nav-label">High Priority</span>
+              <span class="nav-badge" id="badge-high-priority">0</span>
+            </button>
+          </li>
+        </ul>
+
+        <!-- Categories Section -->
+        <div class="nav-section-header">
+          <span class="nav-section-title">Categories</span>
+          <button class="icon-button-subtle" id="addCategoryBtn" title="Create Custom Category" aria-label="Add category">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </button>
+        </div>
+        <ul class="nav-list category-nav-list" id="categoryNavList" role="list">
+          <!-- Dynamically populated categories -->
+        </ul>
+
+        <!-- Productivity Tools Section -->
+        <div class="nav-section-title">Tools</div>
+        <ul class="nav-list" role="list">
+          <li>
+            <button class="nav-item" data-view="timer" id="nav-timer">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 14 14"></polyline>
+              </svg>
+              <span class="nav-label">Focus Timer</span>
+              <span class="timer-indicator-dot" id="sidebarTimerDot" title="Timer is active"></span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-item" data-view="insights" id="nav-insights">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="18" y1="20" x2="18" y2="10"></line>
+                <line x1="12" y1="20" x2="12" y2="4"></line>
+                <line x1="6" y1="20" x2="6" y2="14"></line>
+              </svg>
+              <span class="nav-label">Insights</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-item" data-view="settings" id="nav-settings">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"></path>
+              </svg>
+              <span class="nav-label">Settings & Backup</span>
+            </button>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- Sidebar Footer -->
+      <div class="sidebar-footer">
+        <button class="footer-btn" id="themeToggleBtn" aria-label="Toggle light/dark theme">
+          <span class="theme-icon light-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+          </span>
+          <span class="theme-icon dark-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+          </span>
+          <span class="footer-btn-text" id="themeToggleText">Theme</span>
+        </button>
+
+        <button class="footer-btn" id="shortcutsBtn" aria-label="Keyboard Shortcuts" title="Keyboard Shortcuts (?)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect>
+            <line x1="6" y1="8" x2="6" y2="8"></line>
+            <line x1="10" y1="8" x2="10" y2="8"></line>
+            <line x1="14" y1="8" x2="14" y2="8"></line>
+            <line x1="18" y1="8" x2="18" y2="8"></line>
+            <line x1="6" y1="12" x2="6" y2="12"></line>
+            <line x1="18" y1="12" x2="18" y2="12"></line>
+            <line x1="10" y1="16" x2="14" y2="16"></line>
+          </svg>
+          <span class="footer-btn-text">Shortcuts</span>
+          <kbd class="shortcut-tag">?</kbd>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content" id="mainContent">
+      <!-- Top Application Header -->
+      <header class="app-header">
+        <div class="header-left">
+          <button class="icon-button mobile-menu-btn" id="mobileMenuBtn" aria-label="Open navigation menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <div class="header-titles">
+            <h1 class="page-title" id="pageTitle">Dashboard</h1>
+            <p class="page-subtitle" id="pageSubtitle">Overview of your productivity and upcoming tasks</p>
+          </div>
+        </div>
+
+        <div class="header-right">
+          <!-- Global Search Input -->
+          <div class="search-box">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="search" class="search-input" id="globalSearchInput" placeholder="Search tasks, descriptions, tags... (/)" aria-label="Search tasks">
+            <kbd class="search-shortcut" title="Press / to search">/</kbd>
+            <button class="search-clear-btn" id="searchClearBtn" aria-label="Clear search" style="display: none;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Quick Header Add Task -->
+          <button class="btn btn-primary header-add-btn" id="headerNewTaskBtn" aria-label="Add new task">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>Add Task</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Content Views Wrapper -->
+      <div class="content-body">
+        
+        <!-- ========================================== -->
+        <!-- VIEW 1: DASHBOARD VIEW                    -->
+        <!-- ========================================== -->
+        <section class="view-panel active" id="view-dashboard" aria-labelledby="pageTitle">
+          <!-- Stats Summary Grid -->
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon-wrapper blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"></path>
+                  <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                </svg>
+              </div>
+              <div class="stat-content">
+                <span class="stat-label">Total Tasks</span>
+                <span class="stat-value" id="dashTotalTasks">0</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon-wrapper green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M22 11.08V12a10 10 0 11-5.93-9.14"></path>
+                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+              </div>
+              <div class="stat-content">
+                <span class="stat-label">Completed</span>
+                <span class="stat-value" id="dashCompletedTasks">0</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon-wrapper amber">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+              </div>
+              <div class="stat-content">
+                <span class="stat-label">Pending</span>
+                <span class="stat-value" id="dashPendingTasks">0</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon-wrapper red">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="12"></line>
+                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+              </div>
+              <div class="stat-content">
+                <span class="stat-label">Overdue</span>
+                <span class="stat-value" id="dashOverdueTasks">0</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Productivity Summary Banner -->
+          <div class="dashboard-banner">
+            <div class="banner-info">
+              <div class="banner-title-row">
+                <h2 class="banner-title">Today's Productivity Progress</h2>
+                <span class="progress-percentage-badge" id="dashCompletionRate">0%</span>
+              </div>
+              <p class="banner-subtitle" id="dashProductivitySummary">You have completed 0 of 0 tasks scheduled for today.</p>
+              <!-- Visual Progress Bar -->
+              <div class="progress-track" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" id="dashProgressBar" aria-label="Task completion progress">
+                <div class="progress-fill" id="dashProgressFill" style="width: 0%;"></div>
+              </div>
+            </div>
+            <div class="banner-meta">
+              <div class="meta-item">
+                <span class="meta-label">Focus Sessions Today</span>
+                <span class="meta-value" id="dashFocusSessionsCount">0</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Due Today</span>
+                <span class="meta-value" id="dashDueTodayCount">0</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dashboard Two-Column Layout -->
+          <div class="dashboard-sections">
+            <!-- Left: Today's Tasks & Urgent -->
+            <div class="dashboard-column">
+              <div class="card-panel">
+                <div class="card-panel-header">
+                  <div class="card-panel-title-group">
+                    <h3 class="card-panel-title">My Day</h3>
+                    <span class="badge-pill" id="dashMyDayCount">0 tasks</span>
+                  </div>
+                  <button class="text-button" id="dashGoToMyDayBtn">View All</button>
+                </div>
+                <div class="dash-task-list" id="dashTodayTasksList">
+                  <!-- Dynamically populated or empty state -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Upcoming Deadlines & Recent -->
+            <div class="dashboard-column">
+              <div class="card-panel">
+                <div class="card-panel-header">
+                  <div class="card-panel-title-group">
+                    <h3 class="card-panel-title">Upcoming Deadlines</h3>
+                    <span class="badge-pill" id="dashUpcomingCount">Next 7 days</span>
+                  </div>
+                  <button class="text-button" id="dashGoToUpcomingBtn">View All</button>
+                </div>
+                <div class="dash-task-list" id="dashUpcomingTasksList">
+                  <!-- Dynamically populated or empty state -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- ========================================== -->
+        <!-- VIEW 2: TASK LIST VIEW (Unified)          -->
+        <!-- ========================================== -->
+        <section class="view-panel" id="view-tasks" aria-labelledby="pageTitle">
+          <!-- Toolbar: Filters, Sorting, Actions -->
+          <div class="tasks-toolbar">
+            <div class="toolbar-left">
+              <!-- Priority Filter -->
+              <div class="select-wrapper">
+                <label for="filterPriority" class="sr-only">Filter by Priority</label>
+                <select id="filterPriority" class="form-select filter-select" aria-label="Filter by priority">
+                  <option value="all">All Priorities</option>
+                  <option value="high">High Priority</option>
+                  <option value="medium">Medium Priority</option>
+                  <option value="low">Low Priority</option>
+                </select>
+              </div>
+
+              <!-- Category Filter -->
+              <div class="select-wrapper">
+                <label for="filterCategory" class="sr-only">Filter by Category</label>
+                <select id="filterCategory" class="form-select filter-select" aria-label="Filter by category">
+                  <option value="all">All Categories</option>
+                  <!-- Populated from categories list -->
+                </select>
+              </div>
+
+              <!-- Sort By Dropdown -->
+              <div class="select-wrapper">
+                <label for="sortTasksBy" class="sr-only">Sort Tasks</label>
+                <select id="sortTasksBy" class="form-select filter-select" aria-label="Sort tasks by">
+                  <option value="due-asc">Due Date (Earliest First)</option>
+                  <option value="due-desc">Due Date (Latest First)</option>
+                  <option value="priority-desc">Priority (High to Low)</option>
+                  <option value="created-desc">Created (Newest First)</option>
+                  <option value="created-asc">Created (Oldest First)</option>
+                  <option value="title-asc">Title (A - Z)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="toolbar-right">
+              <!-- Active Filters Clear Indicator -->
+              <button class="btn btn-ghost" id="resetFiltersBtn" style="display: none;" aria-label="Reset all active filters">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M3 12a9 9 0 109-9 9.75 9.75 0 00-6.74 2.74L3 8"></path>
+                  <path d="M3 3v5h5"></path>
+                </svg>
+                <span>Reset Filters</span>
+              </button>
+
+              <!-- Batch Action: Clear Completed -->
+              <button class="btn btn-ghost text-danger" id="clearCompletedBtn" aria-label="Clear all completed tasks">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
+                </svg>
+                <span>Clear Completed</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Active Filter Status Indicator (when searching or filtered) -->
+          <div class="filter-status-banner" id="filterStatusBanner" style="display: none;">
+            <span id="filterStatusText">Showing filtered results</span>
+            <button class="icon-button-subtle" id="dismissFilterBannerBtn" aria-label="Dismiss filtered view">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Tasks Container -->
+          <div class="tasks-container">
+            <ul class="task-list" id="taskList" role="list">
+              <!-- Dynamically populated task cards -->
+            </ul>
+
+            <!-- Unified Empty State -->
+            <div class="empty-state" id="tasksEmptyState" style="display: none;">
+              <div class="empty-state-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M9 11l3 3L22 4"></path>
+                  <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"></path>
+                </svg>
+              </div>
+              <h3 class="empty-state-title" id="emptyStateTitle">No tasks found</h3>
+              <p class="empty-state-description" id="emptyStateDesc">Stay productive! Add a new task to organize your day.</p>
+              <button class="btn btn-primary" id="emptyStateActionBtn">Create New Task</button>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- ========================================== -->
+        <!-- VIEW 3: POMODORO FOCUS TIMER              -->
+        <!-- ========================================== -->
+        <section class="view-panel" id="view-timer" aria-labelledby="pageTitle">
+          <div class="timer-view-wrapper">
+            <!-- Mode Switch Tabs -->
+            <div class="timer-mode-tabs" role="tablist" aria-label="Timer modes">
+              <button class="timer-tab active" role="tab" aria-selected="true" data-mode="focus" id="tabFocus">
+                Focus (25m)
+              </button>
+              <button class="timer-tab" role="tab" aria-selected="false" data-mode="short-break" id="tabShortBreak">
+                Short Break (5m)
+              </button>
+              <button class="timer-tab" role="tab" aria-selected="false" data-mode="long-break" id="tabLongBreak">
+                Long Break (15m)
+              </button>
+            </div>
+
+            <!-- Focus Session Task Linker -->
+            <div class="timer-task-selector">
+              <label for="timerTaskSelect" class="timer-task-label">Associate with a Task (Optional):</label>
+              <select id="timerTaskSelect" class="form-select timer-select" aria-label="Select task to focus on">
+                <option value="">-- No specific task --</option>
+                <!-- Populated with pending tasks -->
+              </select>
+            </div>
+
+            <!-- Big Circular Countdown Clock -->
+            <div class="timer-clock-container">
+              <svg class="timer-progress-ring" viewBox="0 0 280 280" aria-hidden="true">
+                <circle class="timer-ring-bg" cx="140" cy="140" r="124"></circle>
+                <circle class="timer-ring-progress" id="timerProgressRing" cx="140" cy="140" r="124"></circle>
+              </svg>
+              <div class="timer-display-content">
+                <div class="timer-digits" id="timerDisplay" aria-live="polite">25:00</div>
+                <div class="timer-status-label" id="timerStatusLabel">Ready to Focus</div>
+                <div class="timer-active-task-name" id="timerActiveTaskName"></div>
+              </div>
+            </div>
+
+            <!-- Timer Action Buttons -->
+            <div class="timer-actions">
+              <button class="btn btn-secondary" id="timerResetBtn" aria-label="Reset Timer">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="1 4 1 10 7 10"></polyline>
+                  <path d="M3.51 15a9 9 0 102.13-9.36L1 10"></path>
+                </svg>
+                <span>Reset</span>
+              </button>
+
+              <button class="btn btn-primary btn-large" id="timerToggleBtn" aria-label="Start or Pause Timer">
+                <svg id="timerPlayIcon" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true">
+                  <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+                <svg id="timerPauseIcon" style="display: none;" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true">
+                  <rect x="6" y="4" width="4" height="16"></rect>
+                  <rect x="14" y="4" width="4" height="16"></rect>
+                </svg>
+                <span id="timerToggleText">Start Session</span>
+              </button>
+
+              <button class="btn btn-ghost" id="timerSoundToggleBtn" aria-label="Toggle Sound Alert" title="Sound alerts on completion">
+                <svg id="soundOnIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                  <path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"></path>
+                </svg>
+                <svg id="soundOffIcon" style="display: none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                  <line x1="23" y1="9" x2="17" y2="15"></line>
+                  <line x1="17" y1="9" x2="23" y2="15"></line>
+                </svg>
+                <span id="soundStatusText">Chime On</span>
+              </button>
+            </div>
+
+            <!-- Timer Analytics Stats -->
+            <div class="timer-stats-card">
+              <div class="timer-stat-row">
+                <div class="timer-stat-col">
+                  <span class="timer-stat-num" id="timerTodaySessions">0</span>
+                  <span class="timer-stat-title">Sessions Today</span>
+                </div>
+                <div class="timer-stat-divider"></div>
+                <div class="timer-stat-col">
+                  <span class="timer-stat-num" id="timerTodayMinutes">0m</span>
+                  <span class="timer-stat-title">Focus Time Today</span>
+                </div>
+                <div class="timer-stat-divider"></div>
+                <div class="timer-stat-col">
+                  <span class="timer-stat-num" id="timerTotalSessions">0</span>
+                  <span class="timer-stat-title">All-Time Sessions</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="timer-disclaimer">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+              <span>The timer uses system timestamps to track time reliably even if you switch tabs or minimize your browser. Audio chimes play while the tab is open.</span>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- ========================================== -->
+        <!-- VIEW 4: PRODUCTIVITY INSIGHTS             -->
+        <!-- ========================================== -->
+        <section class="view-panel" id="view-insights" aria-labelledby="pageTitle">
+          <div class="insights-wrapper">
+            <!-- 4-Card Summary -->
+            <div class="stats-grid">
+              <div class="stat-card">
+                <div class="stat-icon-wrapper green">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                </div>
+                <div class="stat-content">
+                  <span class="stat-label">Completed Today</span>
+                  <span class="stat-value" id="insightsCompletedToday">0</span>
+                </div>
+              </div>
+
+              <div class="stat-card">
+                <div class="stat-icon-wrapper blue">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                  </svg>
+                </div>
+                <div class="stat-content">
+                  <span class="stat-label">Completed This Week</span>
+                  <span class="stat-value" id="insightsCompletedWeek">0</span>
+                </div>
+              </div>
+
+              <div class="stat-card">
+                <div class="stat-icon-wrapper amber">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M12 6v6l4 2"></path>
+                  </svg>
+                </div>
+                <div class="stat-content">
+                  <span class="stat-label">Completion Rate</span>
+                  <span class="stat-value" id="insightsRate">0%</span>
+                </div>
+              </div>
+
+              <div class="stat-card">
+                <div class="stat-icon-wrapper red">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polygon points="12 6 12 12 16 14"></polygon>
+                  </svg>
+                </div>
+                <div class="stat-content">
+                  <span class="stat-label">Focus Sessions Done</span>
+                  <span class="stat-value" id="insightsFocusDone">0</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 7-Day Completion Bar Chart -->
+            <div class="card-panel">
+              <div class="card-panel-header">
+                <div>
+                  <h3 class="card-panel-title">7-Day Task Completion History</h3>
+                  <p class="card-panel-subtitle">Calculated directly from real completed tasks in your storage</p>
+                </div>
+              </div>
+              <div class="chart-container" id="completionChartContainer">
+                <div class="chart-bars" id="completionChartBars">
+                  <!-- Dynamically rendered 7-day bars -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Two Breakdown Panels -->
+            <div class="dashboard-sections">
+              <!-- Tasks by Priority -->
+              <div class="dashboard-column">
+                <div class="card-panel">
+                  <div class="card-panel-header">
+                    <h3 class="card-panel-title">Distribution by Priority</h3>
+                  </div>
+                  <div class="breakdown-list" id="priorityBreakdownList">
+                    <!-- Populated dynamically -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tasks by Category -->
+              <div class="dashboard-column">
+                <div class="card-panel">
+                  <div class="card-panel-header">
+                    <h3 class="card-panel-title">Distribution by Category</h3>
+                  </div>
+                  <div class="breakdown-list" id="categoryBreakdownList">
+                    <!-- Populated dynamically -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- ========================================== -->
+        <!-- VIEW 5: SETTINGS & DATA BACKUP            -->
+        <!-- ========================================== -->
+        <section class="view-panel" id="view-settings" aria-labelledby="pageTitle">
+          <div class="settings-wrapper">
+            
+            <!-- Backup & Restore -->
+            <div class="card-panel">
+              <div class="card-panel-header">
+                <div>
+                  <h3 class="card-panel-title">Data Backup & Restore</h3>
+                  <p class="card-panel-subtitle">Manage your local data. Everything is stored privately inside your browser.</p>
+                </div>
+              </div>
+              
+              <div class="settings-item-row">
+                <div class="settings-item-info">
+                  <h4 class="settings-item-title">Export Local Backup</h4>
+                  <p class="settings-item-desc">Download a complete JSON file containing all your tasks, categories, and focus timer statistics.</p>
+                </div>
+                <button class="btn btn-secondary" id="exportDataBtn">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                  </svg>
+                  <span>Export JSON</span>
+                </button>
+              </div>
+
+              <div class="settings-item-row">
+                <div class="settings-item-info">
+                  <h4 class="settings-item-title">Import Backup</h4>
+                  <p class="settings-item-desc">Restore your data from a previously exported TaskFlow JSON file. Safe schema validation prevents corrupted data.</p>
+                </div>
+                <div>
+                  <input type="file" id="importFileInput" accept=".json,application/json" style="display: none;" aria-label="Select JSON file to import">
+                  <button class="btn btn-secondary" id="importDataBtn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"></path>
+                      <polyline points="17 8 12 3 7 8"></polyline>
+                      <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <span>Import JSON</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="settings-item-row danger-row">
+                <div class="settings-item-info">
+                  <h4 class="settings-item-title text-danger">Reset All Application Data</h4>
+                  <p class="settings-item-desc">Permanently wipe all tasks, custom categories, and timer statistics, reverting to fresh defaults.</p>
+                </div>
+                <button class="btn btn-danger-outline" id="resetAppBtn">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
+                  </svg>
+                  <span>Reset Application</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Storage Notice -->
+            <div class="card-panel">
+              <div class="card-panel-header">
+                <div>
+                  <h3 class="card-panel-title">Privacy & Storage Notice</h3>
+                  <p class="card-panel-subtitle">Transparent facts about your task data</p>
+                </div>
+              </div>
+              <div class="notice-box">
+                <div class="notice-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0110 0v4"></path>
+                  </svg>
+                </div>
+                <div class="notice-text">
+                  <p><strong>100% Client-Side & Private:</strong> TaskFlow runs completely on your machine. No accounts, no backend databases, no analytics trackers, and no external AI services are used.</p>
+                  <p><strong>Browser-Specific:</strong> Data is saved in this browser's <code>localStorage</code> sandbox. It does not automatically sync across separate browsers, incognito windows, or other devices. To transfer your tasks to another device, use the <strong>Export JSON</strong> feature above.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Categories Management Panel -->
+            <div class="card-panel">
+              <div class="card-panel-header">
+                <div>
+                  <h3 class="card-panel-title">Manage Categories</h3>
+                  <p class="card-panel-subtitle">Custom labels to group and organize your workflow</p>
+                </div>
+                <button class="btn btn-secondary btn-sm" id="settingsAddCategoryBtn">Add Category</button>
+              </div>
+              <div class="categories-manage-list" id="settingsCategoriesList">
+                <!-- Dynamically populated categories -->
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: ADD / EDIT TASK                     -->
+  <!-- ========================================== -->
+  <div class="modal-backdrop" id="taskModalBackdrop" aria-hidden="true">
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="taskModalTitle">
+      <div class="modal-header">
+        <h2 class="modal-title" id="taskModalTitle">Create New Task</h2>
+        <button class="icon-button" id="closeTaskModalBtn" aria-label="Close dialog">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <form id="taskForm" class="modal-form" novalidate>
+        <input type="hidden" id="taskIdInput">
+
+        <!-- Task Title (Required) -->
+        <div class="form-group">
+          <label for="taskTitleInput" class="form-label">
+            Task Title <span class="required-mark" aria-hidden="true">*</span>
+          </label>
+          <input type="text" id="taskTitleInput" class="form-input" placeholder="e.g., Finalize quarterly project proposal" required maxlength="120" autocomplete="off">
+          <div class="form-error-msg" id="taskTitleError" role="alert"></div>
+        </div>
+
+        <!-- Task Description (Optional) -->
+        <div class="form-group">
+          <label for="taskDescInput" class="form-label">Description (Optional)</label>
+          <textarea id="taskDescInput" class="form-textarea" rows="3" placeholder="Add details, notes, links or action items..." maxlength="1000"></textarea>
+        </div>
+
+        <!-- Two Columns: Priority & Category -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="taskPriorityInput" class="form-label">Priority</label>
+            <select id="taskPriorityInput" class="form-select">
+              <option value="low">Low Priority</option>
+              <option value="medium" selected>Medium Priority</option>
+              <option value="high">High Priority</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="taskCategoryInput" class="form-label">Category</label>
+            <select id="taskCategoryInput" class="form-select">
+              <!-- Dynamically populated -->
+            </select>
+          </div>
+        </div>
+
+        <!-- Two Columns: Due Date & Due Time -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="taskDueDateInput" class="form-label">Due Date</label>
+            <input type="date" id="taskDueDateInput" class="form-input">
+          </div>
+
+          <div class="form-group">
+            <label for="taskDueTimeInput" class="form-label">Due Time (Optional)</label>
+            <input type="time" id="taskDueTimeInput" class="form-input">
+          </div>
+        </div>
+
+        <!-- Tags Input -->
+        <div class="form-group">
+          <label for="taskTagsInput" class="form-label">Tags (Optional)</label>
+          <input type="text" id="taskTagsInput" class="form-input" placeholder="e.g., urgent, client, sprint-1 (comma separated)">
+          <span class="form-hint">Separate multiple tags with commas</span>
+        </div>
+
+        <!-- Optional Reminder -->
+        <div class="form-group reminder-group">
+          <div class="checkbox-label-wrapper">
+            <input type="checkbox" id="taskHasReminder" class="custom-checkbox">
+            <label for="taskHasReminder" class="form-label-inline">Set In-App Reminder</label>
+          </div>
+          <div class="reminder-inputs-row" id="reminderInputsContainer" style="display: none;">
+            <input type="datetime-local" id="taskReminderInput" class="form-input" aria-label="Reminder date and time">
+            <span class="form-hint">Reminder triggers as an in-app alert when this website is open.</span>
+          </div>
+        </div>
+
+        <!-- Modal Actions -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="cancelTaskModalBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="saveTaskSubmitBtn">
+            <span>Save Task</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- ========================================== -->
+  <!-- MODAL: TASK DETAIL VIEW                    -->
+  <!-- ========================================== -->
+  <div class="modal-backdrop" id="detailModalBackdrop" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-wide" role="dialog" aria-modal="true" aria-labelledby="detailModalTitle">
+      <div class="modal-header">
+        <div class="detail-header-tags">
+          <span class="badge priority-badge" id="detailPriorityBadge">Medium</span>
+          <span class="badge category-badge" id="detailCategoryBadge">Work</span>
+          <span class="badge status-badge" id="detailStatusBadge">Pending</span>
+        </div>
+        <button class="icon-button" id="closeDetailModalBtn" aria-label="Close task details">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-body detail-body">
+        <h2 class="detail-title" id="detailModalTitle">Task Title</h2>
+        
+        <div class="detail-desc-box" id="detailDescBox">
+          <p class="detail-desc-text" id="detailModalDesc">No description provided.</p>
+        </div>
+
+        <!-- Meta Grid -->
+        <div class="detail-meta-grid">
+          <div class="detail-meta-item">
+            <span class="detail-meta-label">Due Date</span>
+            <span class="detail-meta-value" id="detailDueDateValue">None</span>
+          </div>
+          <div class="detail-meta-item">
+            <span class="detail-meta-label">Reminder</span>
+            <span class="detail-meta-value" id="detailReminderValue">None</span>
+          </div>
+          <div class="detail-meta-item">
+            <span class="detail-meta-label">Created</span>
+            <span class="detail-meta-value" id="detailCreatedValue">-</span>
+          </div>
+          <div class="detail-meta-item">
+            <span class="detail-meta-label">Completed</span>
+            <span class="detail-meta-value" id="detailCompletedValue">-</span>
+          </div>
+        </div>
+
+        <!-- Tags List -->
+        <div class="detail-tags-section" id="detailTagsSection">
+          <span class="detail-meta-label">Tags</span>
+          <div class="tag-chips-list" id="detailTagsList"></div>
+        </div>
+      </div>
+
+      <div class="modal-footer detail-footer">
+        <div class="detail-footer-left">
+          <button class="btn btn-danger-outline btn-sm" id="detailDeleteBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
+            </svg>
+            <span>Delete</span>
+          </button>
+        </div>
+        <div class="detail-footer-right">
+          <button class="btn btn-secondary" id="detailEditBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"></path>
+              <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+            <span>Edit</span>
+          </button>
+          <button class="btn btn-primary" id="detailToggleStatusBtn">
+            <span id="detailToggleStatusText">Mark Completed</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ========================================== -->
+  <!-- MODAL: ADD CUSTOM CATEGORY                -->
+  <!-- ========================================== -->
+  <div class="modal-backdrop" id="categoryModalBackdrop" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-sm" role="dialog" aria-modal="true" aria-labelledby="categoryModalTitle">
+      <div class="modal-header">
+        <h2 class="modal-title" id="categoryModalTitle">Create Category</h2>
+        <button class="icon-button" id="closeCategoryModalBtn" aria-label="Close dialog">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <form id="categoryForm" class="modal-form" novalidate>
+        <div class="form-group">
+          <label for="categoryNameInput" class="form-label">
+            Category Name <span class="required-mark" aria-hidden="true">*</span>
+          </label>
+          <input type="text" id="categoryNameInput" class="form-input" placeholder="e.g., Finance, Reading, Fitness" required maxlength="30" autocomplete="off">
+          <div class="form-error-msg" id="categoryNameError" role="alert"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Color Indicator</label>
+          <div class="color-swatch-picker" role="radiogroup" aria-label="Category color">
+            <button type="button" class="swatch-btn active" data-color="#2563eb" style="--swatch-color: #2563eb;" aria-label="Blue" aria-checked="true"></button>
+            <button type="button" class="swatch-btn" data-color="#059669" style="--swatch-color: #059669;" aria-label="Green" aria-checked="false"></button>
+            <button type="button" class="swatch-btn" data-color="#d97706" style="--swatch-color: #d97706;" aria-label="Amber" aria-checked="false"></button>
+            <button type="button" class="swatch-btn" data-color="#dc2626" style="--swatch-color: #dc2626;" aria-label="Red" aria-checked="false"></button>
+            <button type="button" class="swatch-btn" data-color="#7c3aed" style="--swatch-color: #7c3aed;" aria-label="Indigo" aria-checked="false"></button>
+            <button type="button" class="swatch-btn" data-color="#0891b2" style="--swatch-color: #0891b2;" aria-label="Cyan" aria-checked="false"></button>
+            <button type="button" class="swatch-btn" data-color="#475569" style="--swatch-color: #475569;" aria-label="Slate" aria-checked="false"></button>
+          </div>
+          <input type="hidden" id="categoryColorInput" value="#2563eb">
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="cancelCategoryModalBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="saveCategoryBtn">Create</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- ========================================== -->
+  <!-- MODAL: CONFIRMATION DIALOG (ACCESSIBLE)    -->
+  <!-- ========================================== -->
+  <div class="modal-backdrop" id="confirmModalBackdrop" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-sm" role="alertdialog" aria-modal="true" aria-labelledby="confirmDialogTitle" aria-describedby="confirmDialogMessage">
+      <div class="modal-header">
+        <h2 class="modal-title" id="confirmDialogTitle">Confirm Action</h2>
+        <button class="icon-button" id="closeConfirmModalBtn" aria-label="Close dialog">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="confirm-message" id="confirmDialogMessage">Are you sure you want to perform this action?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="confirmCancelBtn">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmProceedBtn">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ========================================== -->
+  <!-- MODAL: KEYBOARD SHORTCUTS REFERENCE        -->
+  <!-- ========================================== -->
+  <div class="modal-backdrop" id="shortcutsModalBackdrop" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-md" role="dialog" aria-modal="true" aria-labelledby="shortcutsModalTitle">
+      <div class="modal-header">
+        <h2 class="modal-title" id="shortcutsModalTitle">Keyboard Shortcuts</h2>
+        <button class="icon-button" id="closeShortcutsModalBtn" aria-label="Close shortcuts">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="shortcuts-table" role="table" aria-label="Keyboard shortcuts">
+          <div class="shortcut-row" role="row">
+            <span class="shortcut-desc" role="cell">Create new task</span>
+            <div class="shortcut-keys" role="cell"><kbd>N</kbd></div>
+          </div>
+          <div class="shortcut-row" role="row">
+            <span class="shortcut-desc" role="cell">Focus search bar</span>
+            <div class="shortcut-keys" role="cell"><kbd>/</kbd></div>
+          </div>
+          <div class="shortcut-row" role="row">
+            <span class="shortcut-desc" role="cell">Close modal or dialog</span>
+            <div class="shortcut-keys" role="cell"><kbd>Esc</kbd></div>
+          </div>
+          <div class="shortcut-row" role="row">
+            <span class="shortcut-desc" role="cell">Submit active modal form</span>
+            <div class="shortcut-keys" role="cell"><kbd>Ctrl</kbd> + <kbd>Enter</kbd></div>
+          </div>
+          <div class="shortcut-row" role="row">
+            <span class="shortcut-desc" role="cell">Open this shortcuts cheatsheet</span>
+            <div class="shortcut-keys" role="cell"><kbd>?</kbd></div>
+          </div>
+        </div>
+        <p class="form-hint" style="margin-top: 1rem;">Single-letter shortcuts are automatically disabled while typing in input fields.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="dismissShortcutsBtn">Got it</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ========================================== -->
+  <!-- TOAST NOTIFICATIONS CONTAINER              -->
+  <!-- ========================================== -->
+  <div class="toast-container" id="toastContainer" role="status" aria-live="polite"></div>
+
+  <!-- Main JavaScript File -->
+  <script src="script.js"></script>
+</body>
+</html>

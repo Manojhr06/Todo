@@ -1,0 +1,10 @@
+# Dependencies and environment
+.agents/
+.vscode/
+.idea/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+*.tmp
