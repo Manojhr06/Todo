@@ -206,6 +206,48 @@
     return task.dueDate === today;
   }
 
+  function getNextRecurrenceDate(currentDateStr, recurrence) {
+    const base = currentDateStr ? new Date(currentDateStr + 'T00:00:00') : new Date();
+    const d = new Date(base.getTime());
+
+    if (recurrence === 'daily') {
+      d.setDate(d.getDate() + 1);
+    } else if (recurrence === 'weekdays') {
+      d.setDate(d.getDate() + 1);
+      if (d.getDay() === 6) d.setDate(d.getDate() + 2); // Sat -> Mon
+      else if (d.getDay() === 0) d.setDate(d.getDate() + 1); // Sun -> Mon
+    } else if (recurrence === 'weekly') {
+      d.setDate(d.getDate() + 7);
+    } else {
+      d.setDate(d.getDate() + 1);
+    }
+
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  function attach3DTilt(element) {
+    if (!element || typeof window === 'undefined' || !window.matchMedia) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    element.addEventListener('mousemove', (e) => {
+      const rect = element.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      const rotateX = (((y - centerY) / centerY) * -4).toFixed(2);
+      const rotateY = (((x - centerX) / centerX) * 4).toFixed(2);
+      element.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-2px) translateZ(8px)`;
+    });
+
+    element.addEventListener('mouseleave', () => {
+      element.style.transform = '';
+    });
+  }
+
   /* ==========================================================================
      4. PERSISTENCE LAYER (localStorage)
      ========================================================================== */
@@ -347,7 +389,10 @@
             completedAt: t.completedAt || null,
             hasReminder: Boolean(t.hasReminder),
             reminderTime: t.reminderTime || '',
-            reminderFired: Boolean(t.reminderFired)
+            reminderFired: Boolean(t.reminderFired),
+            recurrence: t.recurrence || 'none',
+            dailyReminderTime: t.dailyReminderTime || '09:00',
+            lastReminderDate: t.lastReminderDate || ''
           })).filter(t => t.title.length > 0);
 
           let validCategories = DEFAULT_CATEGORIES;
@@ -588,7 +633,10 @@
         completedAt: null,
         hasReminder: Boolean(taskData.hasReminder),
         reminderTime: taskData.reminderTime || '',
-        reminderFired: false
+        reminderFired: false,
+        recurrence: taskData.recurrence || 'none',
+        dailyReminderTime: taskData.dailyReminderTime || '09:00',
+        lastReminderDate: ''
       };
 
       AppState.tasks.unshift(newTask);
@@ -620,7 +668,9 @@
         dueTime: updateData.dueTime !== undefined ? updateData.dueTime : existing.dueTime,
         tags: Array.isArray(updateData.tags) ? updateData.tags : existing.tags,
         hasReminder: updateData.hasReminder !== undefined ? Boolean(updateData.hasReminder) : existing.hasReminder,
-        reminderTime: updateData.reminderTime !== undefined ? updateData.reminderTime : existing.reminderTime
+        reminderTime: updateData.reminderTime !== undefined ? updateData.reminderTime : existing.reminderTime,
+        recurrence: updateData.recurrence !== undefined ? updateData.recurrence : (existing.recurrence || 'none'),
+        dailyReminderTime: updateData.dailyReminderTime !== undefined ? updateData.dailyReminderTime : (existing.dailyReminderTime || '09:00')
       };
 
       AppState.tasks[taskIndex] = updatedTask;
@@ -651,8 +701,21 @@
       const task = AppState.tasks.find(t => t.id === taskId);
       if (!task) return;
 
-      task.completed = !task.completed;
+      const wasCompleted = task.completed;
+      task.completed = !wasCompleted;
       task.completedAt = task.completed ? new Date().toISOString() : null;
+
+      // Handle daily recurring tasks
+      if (task.completed && task.recurrence && task.recurrence !== 'none') {
+        const nextDate = getNextRecurrenceDate(task.dueDate || getTodayDateString(), task.recurrence);
+        task.dueDate = nextDate;
+        task.completed = false; // Kept active for the next occurrence
+        task.reminderFired = false;
+        StorageService.saveTasks();
+        renderAll();
+        ToastService.show(`Daily routine logged! Next scheduled for ${formatDateFriendly(nextDate)}`, 'success');
+        return;
+      }
 
       StorageService.saveTasks();
       renderAll();
@@ -773,6 +836,8 @@
           if (!task.completed) return false;
         } else if (view === 'high-priority') {
           if (task.priority !== 'high' || task.completed) return false;
+        } else if (view === 'recurring') {
+          if (!task.recurrence || task.recurrence === 'none') return false;
         } else if (view.startsWith('category-')) {
           const catId = view.replace('category-', '');
           const cat = AppState.categories.find(c => c.id === catId);
@@ -849,8 +914,9 @@
       const dueToday = AppState.tasks.filter(t => t.dueDate === today).length;
       const upcoming = AppState.tasks.filter(t => !t.completed && t.dueDate && t.dueDate > today).length;
       const highPriority = AppState.tasks.filter(t => !t.completed && t.priority === 'high').length;
+      const recurring = AppState.tasks.filter(t => t.recurrence && t.recurrence !== 'none').length;
 
-      return { all, completed, pending, overdue, dueToday, upcoming, highPriority };
+      return { all, completed, pending, overdue, dueToday, upcoming, highPriority, recurring };
     }
   };
 
@@ -1054,6 +1120,7 @@
       'overdue': { title: 'Overdue', subtitle: 'Tasks that require immediate attention' },
       'completed': { title: 'Completed Tasks', subtitle: 'Archive of finished tasks' },
       'high-priority': { title: 'High Priority', subtitle: 'Urgent and critical tasks' },
+      'recurring': { title: 'Daily & Recurring Tasks', subtitle: 'Habits and daily routine topics set to repeat automatically' },
       'timer': { title: 'Focus Timer', subtitle: 'Distraction-free Pomodoro session tracking' },
       'insights': { title: 'Productivity Insights', subtitle: 'Historical trends, stats, and task breakdown' },
       'settings': { title: 'Settings & Backup', subtitle: 'Manage categories, import/export data, and storage' }
@@ -1142,6 +1209,7 @@
     setElementText('badge-overdue', counts.overdue);
     setElementText('badge-completed', counts.completed);
     setElementText('badge-high-priority', counts.highPriority);
+    setElementText('badge-recurring', counts.recurring);
 
     // Update Category Counts
     AppState.categories.forEach(cat => {
@@ -1246,6 +1314,9 @@
     setElementText('dashFocusSessionsCount', AppState.focusStats.todaySessions);
     setElementText('dashDueTodayCount', counts.dueToday);
 
+    // Apply tactile 3D hover physics to stat cards
+    document.querySelectorAll('.stat-card').forEach(card => attach3DTilt(card));
+
     // Render Mini Lists in Dashboard
     renderDashboardMiniLists();
   }
@@ -1308,6 +1379,16 @@
             <span class="category-dot" style="background-color: ${catColor};"></span>
             ${escapeHtml(task.category)}
           </span>
+          ${task.recurrence && task.recurrence !== 'none' ? `
+            <span class="badge recurrence-badge" title="Daily recurring topic">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <polyline points="1 20 1 14 7 14"></polyline>
+                <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"></path>
+              </svg>
+              ${task.recurrence === 'daily' ? 'Daily' : (task.recurrence === 'weekdays' ? 'Weekdays' : 'Weekly')}
+            </span>
+          ` : ''}
           ${task.dueDate ? `<span class="badge date-badge ${isTaskOverdue(task) ? 'is-overdue' : ''}">${formatDateFriendly(task.dueDate)}</span>` : ''}
         </div>
       </div>
@@ -1324,6 +1405,7 @@
       openTaskDetailModal(task.id);
     });
 
+    attach3DTilt(row);
     return row;
   }
 
@@ -1423,6 +1505,17 @@
             ${escapeHtml(task.category)}
           </span>
 
+          ${task.recurrence && task.recurrence !== 'none' ? `
+            <span class="badge recurrence-badge" title="Daily recurring topic">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <polyline points="1 20 1 14 7 14"></polyline>
+                <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"></path>
+              </svg>
+              ${task.recurrence === 'daily' ? 'Repeats Daily' : (task.recurrence === 'weekdays' ? 'Weekdays' : 'Repeats Weekly')}
+            </span>
+          ` : ''}
+
           ${task.dueDate ? `
             <span class="${dateBadgeClass}">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1499,6 +1592,7 @@
       }
     });
 
+    attach3DTilt(li);
     return li;
   }
 
@@ -1723,6 +1817,13 @@
     document.getElementById('reminderInputsContainer').style.display = 'none';
     document.getElementById('taskReminderInput').value = '';
 
+    const recurrenceSelect = document.getElementById('taskRecurrenceInput');
+    if (recurrenceSelect) recurrenceSelect.value = 'none';
+    const reminderGroup = document.getElementById('dailyReminderTimeGroup');
+    if (reminderGroup) reminderGroup.style.display = 'none';
+    const reminderTimeInput = document.getElementById('taskDailyReminderTimeInput');
+    if (reminderTimeInput) reminderTimeInput.value = '09:00';
+
     document.getElementById('taskTitleError').textContent = '';
     ModalService.open('taskModalBackdrop');
   }
@@ -1745,6 +1846,19 @@
     reminderCheck.checked = Boolean(task.hasReminder);
     document.getElementById('reminderInputsContainer').style.display = task.hasReminder ? 'flex' : 'none';
     document.getElementById('taskReminderInput').value = task.reminderTime || '';
+
+    const recurrenceSelect = document.getElementById('taskRecurrenceInput');
+    if (recurrenceSelect) {
+      recurrenceSelect.value = task.recurrence || 'none';
+      const reminderGroup = document.getElementById('dailyReminderTimeGroup');
+      if (reminderGroup) {
+        reminderGroup.style.display = (task.recurrence && task.recurrence !== 'none') ? 'block' : 'none';
+      }
+    }
+    const reminderTimeInput = document.getElementById('taskDailyReminderTimeInput');
+    if (reminderTimeInput) {
+      reminderTimeInput.value = task.dailyReminderTime || '09:00';
+    }
 
     document.getElementById('taskTitleError').textContent = '';
     ModalService.open('taskModalBackdrop');
@@ -1773,6 +1887,18 @@
     const sBadge = document.getElementById('detailStatusBadge');
     sBadge.className = `badge ${task.completed ? 'status-badge-completed' : 'status-badge-pending'}`;
     sBadge.textContent = task.completed ? 'Completed' : 'Pending';
+
+    // Recurrence & Daily Reminder
+    const recurrenceEl = document.getElementById('detailRecurrenceValue');
+    if (recurrenceEl) {
+      if (task.recurrence && task.recurrence !== 'none') {
+        const timeStr = task.dailyReminderTime ? ` at ${task.dailyReminderTime}` : '';
+        const recName = task.recurrence === 'daily' ? 'Repeats Daily' : (task.recurrence === 'weekdays' ? 'Weekdays (Mon-Fri)' : 'Repeats Weekly');
+        recurrenceEl.textContent = `${recName}${timeStr}`;
+      } else {
+        recurrenceEl.textContent = 'None (one-time task)';
+      }
+    }
 
     // Due date
     const dueEl = document.getElementById('detailDueDateValue');
@@ -1851,7 +1977,13 @@
   function startReminderChecker() {
     setInterval(() => {
       const now = new Date();
+      const todayStr = getTodayDateString();
+      const currentHours = String(now.getHours()).padStart(2, '0');
+      const currentMins = String(now.getMinutes()).padStart(2, '0');
+      const currentTimeStr = `${currentHours}:${currentMins}`;
+
       AppState.tasks.forEach(task => {
+        // 1. One-time specific deadline reminder
         if (!task.completed && task.hasReminder && task.reminderTime && !task.reminderFired) {
           const reminderDate = new Date(task.reminderTime);
           if (reminderDate <= now) {
@@ -1859,6 +1991,16 @@
             StorageService.saveTasks();
             AudioService.playChime();
             ToastService.show(`Reminder: "${task.title}" is due!`, 'warning', 6000);
+          }
+        }
+
+        // 2. Daily recurring reminder for same topic/routine
+        if (task.recurrence && task.recurrence !== 'none' && task.dailyReminderTime) {
+          if (task.lastReminderDate !== todayStr && task.dailyReminderTime <= currentTimeStr) {
+            task.lastReminderDate = todayStr;
+            StorageService.saveTasks();
+            AudioService.playChime();
+            ToastService.show(`Daily Routine Reminder: "${task.title}" (${task.recurrence === 'daily' ? 'Daily Topic' : task.recurrence})`, 'info', 7000);
           }
         }
       });
@@ -1921,6 +2063,11 @@
       const hasReminder = document.getElementById('taskHasReminder').checked;
       const reminderTime = hasReminder ? document.getElementById('taskReminderInput').value : '';
 
+      const recurrenceSelect = document.getElementById('taskRecurrenceInput');
+      const recurrence = recurrenceSelect ? recurrenceSelect.value : 'none';
+      const reminderTimeInput = document.getElementById('taskDailyReminderTimeInput');
+      const dailyReminderTime = reminderTimeInput ? reminderTimeInput.value : '09:00';
+
       const formData = {
         title: title,
         description: document.getElementById('taskDescInput').value,
@@ -1930,7 +2077,9 @@
         dueTime: document.getElementById('taskDueTimeInput').value,
         tags: tags,
         hasReminder: hasReminder,
-        reminderTime: reminderTime
+        reminderTime: reminderTime,
+        recurrence: recurrence,
+        dailyReminderTime: dailyReminderTime
       };
 
       let result;
@@ -1946,6 +2095,17 @@
         errorEl.textContent = result.error || 'Failed to save task.';
       }
     });
+
+    // Recurrence dropdown change listener
+    const taskRecurrenceEl = document.getElementById('taskRecurrenceInput');
+    if (taskRecurrenceEl) {
+      taskRecurrenceEl.addEventListener('change', (e) => {
+        const group = document.getElementById('dailyReminderTimeGroup');
+        if (group) {
+          group.style.display = (e.target.value !== 'none') ? 'block' : 'none';
+        }
+      });
+    }
 
     // Reminder toggle inside Task Form
     document.getElementById('taskHasReminder').addEventListener('change', (e) => {

@@ -676,8 +676,9 @@ ul, ol {
   border-radius: var(--radius-md);
   font-size: 0.88rem;
   font-weight: 500;
-  transition: all var(--transition-fast);
+  transition: transform 120ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 120ms ease, background-color var(--transition-fast);
   white-space: nowrap;
+  transform: translateZ(0);
 }
 
 .btn svg {
@@ -705,15 +706,19 @@ ul, ol {
 .btn-primary {
   background-color: var(--accent-primary);
   color: var(--text-inverse);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 3px 0 var(--accent-active), 0 5px 12px rgba(37, 99, 235, 0.22);
 }
 
 .btn-primary:hover {
   background-color: var(--accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 var(--accent-active), 0 7px 16px rgba(37, 99, 235, 0.28);
 }
 
 .btn-primary:active {
   background-color: var(--accent-active);
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--accent-active), 0 2px 4px rgba(37, 99, 235, 0.2);
 }
 
 .btn-primary .shortcut-tag {
@@ -727,12 +732,19 @@ ul, ol {
   background-color: var(--bg-surface);
   color: var(--text-primary);
   border: 1px solid var(--border-subtle);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 2px 0 var(--border-strong), 0 3px 6px rgba(0, 0, 0, 0.04);
 }
 
 .btn-secondary:hover {
   background-color: var(--bg-subtle);
   border-color: var(--border-strong);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 0 var(--border-strong), 0 5px 10px rgba(0, 0, 0, 0.06);
+}
+
+.btn-secondary:active {
+  transform: translateY(2px);
+  box-shadow: 0 0 0 var(--border-strong), 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .btn-ghost {
@@ -828,7 +840,15 @@ ul, ol {
   display: flex;
   align-items: center;
   gap: 1rem;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03), 0 8px 16px -4px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  transform-style: preserve-3d;
+  transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 220ms ease;
+  will-change: transform;
+}
+
+.stat-card:hover {
+  transform: translateY(-3px) translateZ(10px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.06), 0 16px 28px -6px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 .stat-icon-wrapper {
@@ -1101,14 +1121,17 @@ ul, ol {
   display: flex;
   align-items: flex-start;
   gap: 0.85rem;
-  transition: all var(--transition-fast);
+  transform-style: preserve-3d;
+  transition: transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 200ms ease, border-color var(--transition-fast);
   position: relative;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 8px -2px rgba(0, 0, 0, 0.04);
+  will-change: transform;
 }
 
 .task-item:hover {
   border-color: var(--border-strong);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-2px) translateZ(8px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06), 0 12px 20px -4px rgba(0, 0, 0, 0.08);
 }
 
 .task-item.is-completed {
@@ -1273,6 +1296,13 @@ ul, ol {
   border: 1px solid var(--warning-border);
 }
 
+.badge.recurrence-badge {
+  background-color: var(--accent-subtle);
+  color: var(--accent-text);
+  border: 1px solid rgba(37, 99, 235, 0.25);
+  font-weight: 600;
+}
+
 /* Task Actions (Hover / Right) */
 .task-actions {
   display: flex;
@@ -1393,6 +1423,15 @@ ul, ol {
   display: flex;
   align-items: center;
   justify-content: center;
+  transform: perspective(800px) rotateX(2deg);
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.05), 0 16px 36px -8px rgba(0, 0, 0, 0.09);
+  border-radius: 50%;
+  border: 4px solid var(--border-subtle);
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.timer-clock-container:hover {
+  transform: perspective(800px) rotateX(0deg) translateY(-2px);
 }
 
 .timer-progress-ring {
@@ -1758,12 +1797,13 @@ ul, ol {
   background-color: var(--bg-surface-elevated);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-modal);
+  box-shadow: var(--shadow-modal), 0 25px 50px -12px rgba(0, 0, 0, 0.2);
   overflow: hidden;
   display: flex;
   flex-direction: column;
   max-height: 90vh;
-  animation: modalSlideUp var(--transition-normal);
+  transform-style: preserve-3d;
+  animation: modalSlideUp3D var(--transition-normal);
 }
 
 .modal-dialog-sm {
@@ -1774,9 +1814,9 @@ ul, ol {
   max-width: 600px;
 }
 
-@keyframes modalSlideUp {
-  from { transform: translateY(12px) scale(0.98); opacity: 0; }
-  to { transform: translateY(0) scale(1); opacity: 1; }
+@keyframes modalSlideUp3D {
+  from { transform: perspective(1000px) translateZ(-40px) rotateX(4deg) translateY(16px); opacity: 0; }
+  to { transform: perspective(1000px) translateZ(0) rotateX(0deg) translateY(0); opacity: 1; }
 }
 
 .modal-header {

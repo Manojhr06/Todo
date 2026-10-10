@@ -12,10 +12,11 @@ TaskFlow is a fast, minimalist, and private productivity dashboard built with mo
 - **My Day & Upcoming Deadlines**: Quick-access widgets summarizing tasks due today and in the next 7 days.
 - **Empty States**: Context-aware guidance when there are no tasks in the current view.
 
-### 2. Full Task Management (CRUD)
-- **Create & Edit Tasks**: Assign a title, rich description, priority (Low, Medium, High), category, due date, due time, tags, and optional in-app reminders.
+### 2. Full Task Management (CRUD) & Daily Routines
+- **Create & Edit Tasks**: Assign a title, rich description, priority (Low, Medium, High), category, due date, due time, tags, recurrence cadence, and optional in-app reminders.
+- **Daily Recurring Reminders**: Set recurring habits or daily routine topics (Daily, Weekdays, Weekly) with a specific daily reminder time (e.g., 09:00). When completed, recurring tasks automatically advance to the next scheduled occurrence date while preserving your productivity streak.
 - **Task Completion**: Instant toggle with strike-through styling and timestamp recording (`completedAt`).
-- **Task Details View**: Inspect full metadata, creation and completion timestamps, and tags.
+- **Task Details View**: Inspect full metadata, creation and completion timestamps, recurrence cadence, and tags.
 - **Batch Actions**: One-click "Clear Completed" with a confirmation dialog.
 - **Safe Validation**: Prevents empty tasks and protects against malicious input strings.
 
@@ -28,9 +29,15 @@ TaskFlow is a fast, minimalist, and private productivity dashboard built with mo
   - **Overdue**: Urgent tasks past their due date.
   - **Completed**: Log of finished tasks.
   - **High Priority**: Urgent, high-impact items.
+  - **Daily & Recurring**: Filter specifically for recurring habits and daily topic routines.
   - **Category Views**: Filter by specific category.
 - **Live Search**: Instant search by task title, description, or tags with `/` keyboard shortcut.
 - **Multi-criteria Toolbar**: Combine priority filtering, category filtering, and multi-mode sorting (due date, priority, creation date, title).
+
+### 3D Visual Experience & Tactile Animations
+- **Hardware-Accelerated 3D Tilt**: Interactive 3D perspective tilt physics (`perspective(1000px) rotateX/rotateY/translateZ`) on task cards and dashboard metric cards responding to cursor motion.
+- **Tactile 3D Button Depth**: Realistic depressed physical button states with multi-layer box shadows on hover and active click.
+- **3D Spatial Transitions**: Smooth modal popups with scale and rotation keyframes, respectful of `prefers-reduced-motion` settings.
 
 ### 4. Custom Categories
 - Default categories included: **Personal**, **Work**, **Study**, **Projects**, and **Health**.
