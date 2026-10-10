@@ -231,6 +231,8 @@
   function attach3DTilt(element) {
     if (!element || typeof window === 'undefined' || !window.matchMedia) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (element._tiltAttached) return;
+    element._tiltAttached = true;
 
     element.addEventListener('mousemove', (e) => {
       const rect = element.getBoundingClientRect();
@@ -1361,16 +1363,17 @@
   function createMiniTaskRow(task) {
     const row = document.createElement('div');
     row.className = `task-item priority-${task.priority} ${task.completed ? 'is-completed' : ''}`;
+    row.setAttribute('data-task-id', task.id);
     
     const catColor = CategoryManager.getColorForCategory(task.category);
 
     row.innerHTML = `
-      <button class="task-checkbox-btn" aria-label="Toggle task completion">
+      <button class="task-checkbox-btn" aria-label="${task.completed ? 'Reopen task' : 'Mark task completed'}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="20 6 9 17 4 12"></polyline>
         </svg>
       </button>
-      <div class="task-main">
+      <div class="task-main" role="button" tabindex="0" aria-label="View task details">
         <div class="task-header-row">
           <span class="task-title"></span>
         </div>
@@ -1392,17 +1395,44 @@
           ${task.dueDate ? `<span class="badge date-badge ${isTaskOverdue(task) ? 'is-overdue' : ''}">${formatDateFriendly(task.dueDate)}</span>` : ''}
         </div>
       </div>
+      <div class="task-actions">
+        <button class="icon-button-subtle task-edit-btn" aria-label="Edit task" title="Edit Task">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"></path>
+            <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+          </svg>
+        </button>
+        <button class="icon-button-subtle task-delete-btn" aria-label="Delete task" title="Delete Task">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
+          </svg>
+        </button>
+      </div>
     `;
 
     row.querySelector('.task-title').textContent = task.title;
+
+    row.addEventListener('click', (e) => {
+      if (e.target.closest('.task-checkbox-btn') || e.target.closest('.task-actions')) {
+        return;
+      }
+      openTaskDetailModal(task.id);
+    });
 
     row.querySelector('.task-checkbox-btn').addEventListener('click', (e) => {
       e.stopPropagation();
       TaskManager.toggleComplete(task.id);
     });
 
-    row.querySelector('.task-main').addEventListener('click', () => {
-      openTaskDetailModal(task.id);
+    row.querySelector('.task-edit-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      openTaskEditModal(task.id);
+    });
+
+    row.querySelector('.task-delete-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      TaskManager.deleteTask(task.id);
     });
 
     attach3DTilt(row);
@@ -1581,6 +1611,13 @@
     li.querySelector('.task-delete-btn').addEventListener('click', (e) => {
       e.stopPropagation();
       TaskManager.deleteTask(task.id);
+    });
+
+    li.addEventListener('click', (e) => {
+      if (e.target.closest('.task-checkbox-btn') || e.target.closest('.task-actions')) {
+        return;
+      }
+      openTaskDetailModal(task.id);
     });
 
     const mainClick = li.querySelector('.task-main');
@@ -2159,6 +2196,26 @@
       }
     });
 
+    // Dashboard Stat Cards click to filter
+    const statCards = [
+      { id: 'statCardTotal', view: 'all' },
+      { id: 'statCardCompleted', view: 'completed' },
+      { id: 'statCardPending', view: 'all' },
+      { id: 'statCardOverdue', view: 'overdue' }
+    ];
+    statCards.forEach(({ id, view }) => {
+      const card = document.getElementById(id);
+      if (card) {
+        card.addEventListener('click', () => NavigationService.switchView(view));
+        card.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            NavigationService.switchView(view);
+          }
+        });
+      }
+    });
+
     // 5. Confirmation Modal
     document.getElementById('confirmProceedBtn').addEventListener('click', () => {
       if (typeof AppState.pendingConfirmAction === 'function') {
@@ -2168,16 +2225,25 @@
       }
       ModalService.close('confirmModalBackdrop');
     });
-    document.getElementById('confirmCancelBtn').addEventListener('click', () => ModalService.close('confirmModalBackdrop'));
-    document.getElementById('closeConfirmModalBtn').addEventListener('click', () => ModalService.close('confirmModalBackdrop'));
+    document.getElementById('confirmCancelBtn').addEventListener('click', () => {
+      AppState.pendingConfirmAction = null;
+      ModalService.close('confirmModalBackdrop');
+    });
+    document.getElementById('closeConfirmModalBtn').addEventListener('click', () => {
+      AppState.pendingConfirmAction = null;
+      ModalService.close('confirmModalBackdrop');
+    });
 
     // 6. Global Search
     const searchInput = document.getElementById('globalSearchInput');
     const clearSearchBtn = document.getElementById('searchClearBtn');
+    const searchShortcutKbd = document.getElementById('searchShortcutKbd');
 
     searchInput.addEventListener('input', (e) => {
       AppState.searchQuery = e.target.value;
-      clearSearchBtn.style.display = e.target.value ? 'flex' : 'none';
+      const hasQuery = Boolean(e.target.value);
+      clearSearchBtn.style.display = hasQuery ? 'flex' : 'none';
+      if (searchShortcutKbd) searchShortcutKbd.style.display = hasQuery ? 'none' : 'inline-block';
       if (AppState.currentView === 'dashboard' || AppState.currentView === 'timer' || AppState.currentView === 'insights' || AppState.currentView === 'settings') {
         NavigationService.switchView('all');
       } else {
@@ -2189,6 +2255,7 @@
       searchInput.value = '';
       AppState.searchQuery = '';
       clearSearchBtn.style.display = 'none';
+      if (searchShortcutKbd) searchShortcutKbd.style.display = 'inline-block';
       renderTasksView();
       searchInput.focus();
     });
@@ -2215,6 +2282,7 @@
       AppState.filterCategory = 'all';
       searchInput.value = '';
       clearSearchBtn.style.display = 'none';
+      if (searchShortcutKbd) searchShortcutKbd.style.display = 'inline-block';
       document.getElementById('filterPriority').value = 'all';
       document.getElementById('filterCategory').value = 'all';
       renderTasksView();
@@ -2237,6 +2305,17 @@
     document.getElementById('timerToggleBtn').addEventListener('click', () => FocusTimer.toggle());
     document.getElementById('timerResetBtn').addEventListener('click', () => FocusTimer.reset());
 
+    const timerClock = document.getElementById('timerClockContainer');
+    if (timerClock) {
+      timerClock.addEventListener('click', () => FocusTimer.toggle());
+      timerClock.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          FocusTimer.toggle();
+        }
+      });
+    }
+
     document.getElementById('timerTaskSelect').addEventListener('change', (e) => {
       AppState.timer.activeTaskId = e.target.value;
       const task = AppState.tasks.find(t => t.id === e.target.value);
@@ -2258,6 +2337,7 @@
       const next = current === 'dark' ? 'light' : 'dark';
       document.documentElement.setAttribute('data-theme', next);
       localStorage.setItem(STORAGE_KEYS.THEME, next);
+      updateThemeButtonUI();
       ToastService.show(`Switched to ${next} theme`, 'info');
     });
 
@@ -2323,6 +2403,19 @@
     }
   }
 
+  function updateThemeButtonUI() {
+    const themeBtn = document.getElementById('themeToggleBtn');
+    const themeText = document.getElementById('themeToggleText');
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+    if (themeText) {
+      themeText.textContent = currentTheme === 'dark' ? 'Dark' : 'Light';
+    }
+    if (themeBtn) {
+      themeBtn.setAttribute('aria-label', `Theme toggle: currently ${currentTheme} mode`);
+      themeBtn.title = `Switch to ${currentTheme === 'dark' ? 'light' : 'dark'} mode`;
+    }
+  }
+
   /* Global Keyboard Shortcuts (N, /, Esc, ?, Ctrl+Enter) */
   function handleGlobalKeydown(e) {
     const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
@@ -2384,6 +2477,7 @@
     StorageService.load();
     FocusTimer.init();
     updateSoundButtonUI();
+    updateThemeButtonUI();
     renderAll();
     setupEventListeners();
     startReminderChecker();
